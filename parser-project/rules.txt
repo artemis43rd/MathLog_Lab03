@@ -1,0 +1,60 @@
+S0 -> HS Ls
+Ls -> Kon1 IHS1 Ls | Kon2 HS Ls | e’
+HS -> IHS | DHS
+DHS -> S1s P1sAll Rest | S2s P2s Rest | S3s P3sAll Rest | S1p P1p3p Rest | S2p P2pAll Rest | sie P3s1p3p Rest | die BaseSP Rest | es P3s1p3p Rest
+BaseSP -> NomF P3sAll | NomP P1p3p
+Rest -> Obj Neg ObjRest | Adv Neg ObjNB | Neg AnyNB | e’
+ObjRest -> Adv Neg | Neg AdvNB | e’
+IHS -> Obj1 IHS2 | Adv IHS3
+IHS0 -> P1s3s S1s3s| P1p3p S1p3p | P2s S2s | P3s S3s1 | P3s2p S3s2p | P2p S2p | P1s S1s
+IHS1 -> IHS0 Rest
+IHS2 -> IHS0 ObjRest
+IHS3 -> IHS0 AdvRest
+AdvRest -> Obj Neg | Neg ObjNB | e’
+AnyNB -> ObjNB | AdvNB | e’
+ObjNB -> KonObj NB | e’
+AdvNB -> KonAdv NB | e’
+NB -> S1s NBMid P1s | S2s NBMid P2s | S3s NBMid P3sAll |
+S1p NBMid P1p3p | S2p NBMid P2p | sie NBMid P3s1p3p | die NBSO
+NBSO -> NomF NBMid P3s | NomP NBMid P1p3p
+NBMid -> Obj ObjRest2 | ObjRest2 | KonObj NB ObjRest2 | e’
+ObjRest2 -> Adv Neg | KonAdv NB Neg | e’
+
+Neg -> nicht | e’
+Obj -> Obj1 | sie | es
+
+Kon1 -> dann | deshalb | darum
+Kon2 -> und | aber | denn
+KonObj -> dass
+KonAdv -> wenn | wann | weil
+
+P1s -> denke | sehe | sage
+P2s -> denkst | weiBt | siehst | sagst
+P3s -> sieht
+P1p3p -> denken | wissen | sehen | sagen
+P2p -> wisst | seht
+P1s3s -> weiB
+P3s2p -> denkt | sagt
+P1sAll -> P1s | P1s3s
+P3sAll -> P3s | P1s3s | P3s2p
+P2pAll -> P2p | P3s2p
+P3s1p3p -> P1p3p | P3sAll
+
+S1s -> ich
+S2s -> du
+S3s -> er | der NomM | das NomN
+S1p -> wir
+S2p -> ihr
+S3p -> sie | die NomP
+S1s3s -> S1s | S3s | es | sie | die NomF
+S1p3p -> S1p | S3p
+S3s2p -> S3s | S2p | es | sie | die NomF
+S3s1 -> S3s | es | sie | die NomF
+
+NomP -> Br¨uder | V¨ater | M¨adchen | Frauen | M¨utter | Kinder
+NomM -> Bruder | Vater
+NomF -> Mutter | Frau
+NomN -> M¨adchen | Kind
+
+Obj1 -> mich | dich | ihn | uns | euch
+Adv -> jetzt | endlich
