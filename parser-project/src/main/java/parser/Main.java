@@ -3,10 +3,13 @@ package parser;
 import java.util.*;
 
 public class Main {
+    static Generator generator;
+    static Checker checker;
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        Parser parser = new Parser();
-        Generator generator = new Generator();
+        Scanner scanner = new Scanner(System.in, "UTF-8");
+        checker = new Checker();
+        generator = new Generator();
         char choice;
 
         printMenu();
@@ -18,19 +21,45 @@ public class Main {
             switch (choice) {
                 case '1':
                     printSlesh();
-                    System.out.print("Введите цепочку для проверки (через пробел): ");
+                    System.out.print("Введите предложение для проверки: ");
                     scanner.nextLine();  // Очистка буфера
+
                     String inputText = scanner.nextLine();
-                    List<String> input = Arrays.asList(inputText.split("\\s+"));
-                    boolean isValid = parser.parse(input);
-                    System.out.println("Цепочка " + (isValid ? "принадлежит" : "не принадлежит") + " языку.");
+                    checker.CheckStr(inputText);
                     printSlesh();
                     break;
 
                 case '2':
                     printSlesh();
-                    String generated = generator.generate();
-                    System.out.println("Сгенерированная цепочка: " + generated);
+                    System.out.println("(1) - Генерация утвердительного предложения");
+                    System.out.println("(2) - Генерация отрицательного предложения");
+                    System.out.println("(3) - Генерации вопросительного предложения");
+                    scanner.nextLine();
+
+                    boolean flag=true;
+                    while (flag) {
+                        System.out.print("Выберите какое предложение сгенерировать: ");
+                        char choice2;
+                        choice2 = scanner.next().charAt(0);
+
+                        switch (choice2) {
+                            case '1':
+                                System.out.println("Сгенерированная цепочка: " + generator.GenerateP());
+                                flag=false;
+                                break;
+                            case '2':
+                                System.out.println("Сгенерированная цепочка: " + generator.GenerateN());
+                                flag=false;
+                                break;
+                            case '3':
+                                System.out.println("Сгенерированная цепочка: " + generator.GenerateQ());
+                                flag=false;
+                                break;
+                            
+                            default:
+                                System.out.println("Неверный выбор! Пожалуйста, выберите снова.\n");
+                        }
+                    }
                     printSlesh();
                     break;
 
@@ -65,8 +94,8 @@ public class Main {
         System.out.println("\t\t   MENU");
         printSnow();
         System.out.println("[M] - Напечатать MENU");
-        System.out.println("[1] - Ввести цепочку для проверки");
-        System.out.println("[2] - Сгенерировать цепочку");
+        System.out.println("[1] - Ввести предложение для проверки");
+        System.out.println("[2] - Сгенерировать предложение");
         System.out.println("[0] - Завершить работу программы");
         printSnow();
     }

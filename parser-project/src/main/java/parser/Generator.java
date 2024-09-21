@@ -1,74 +1,192 @@
 package parser;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 public class Generator {
-    private final Map<String, List<String>> rules = new HashMap<>();
-    private final Random random = new Random();
+    class Node {
+        String name;
+        Vector<Vector<Node>> matrix_roles;
+        ArrayList<String> tokens;
 
-    public Generator() {
-        loadRules();
-    }
-
-    private void loadRules() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("./rules.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Пропускаем пустые строки и строки, начинающиеся с комментариев
-                if (line.trim().isEmpty() || line.startsWith("//")) {
-                    continue;
-                }
-    
-                // Разделяем правило на левую и правую части
-                String[] parts = line.split("->");
-                if (parts.length == 2) {
-                    String nonTerminal = parts[0].trim();
-                    String[] productions = parts[1].split("\\|");
-    
-                    // Убираем пробелы и добавляем все варианты правил
-                    List<String> productionList = new ArrayList<>();
-                    for (String production : productions) {
-                        productionList.add(production.trim());
-                    }
-                    rules.put(nonTerminal, productionList);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        public void setTokens(ArrayList<String> tokens) {
+            this.tokens = tokens;
         }
-        
-        //System.out.println("Rules:");
-        //for (Map.Entry<String, List<String>> entry : rules.entrySet()) {
-        //    System.out.println(entry.getKey() + " -> " + String.join(" | ", entry.getValue()));
-        //}
+
+        public void setMatrix_roles(Vector<Vector<Node>> matrix_roles) {
+            this.matrix_roles = matrix_roles;
+        }
+
+        String getRandomToken() {
+            return tokens.get(new Random().nextInt(tokens.size()));
+        }
+
+        Vector<Node> getRandomRules() {
+            return matrix_roles.get(new Random().nextInt(matrix_roles.size()));
+        }
+
+        Node(String name) {
+            this.name = name;
+            matrix_roles = new Vector<>();
+            tokens = new ArrayList<>();
+        }
     }
 
+    Node SentP = new Node("SentP");
+    Node SentQ = new Node("SentQ");
+    Node SentN = new Node("SentN");
+    Node SubjectGroup = new Node("SubjectGroup");
+    Node vActGroup = new Node("vActGroup");
+    Node vStateGroup = new Node("vStateGroup");
+    Node vMoveGroup = new Node("vMoveGroup");
+    Node Adjective = new Node("Adjective");
+    Node NounObject = new Node("NounObject");
+    Node Pronoun = new Node("Pronoun");
+    Node Preposition = new Node("Preposition");
+    Node Place = new Node("Place");
+    Node AdjAction = new Node("AdjAction");
+    Node Link = new Node("Link");
+    Node Not = new Node("Not");
+    Node vGroup = new Node("vGroup");
 
-    public String generate() {
-        List<String> result = new ArrayList<>();
-        result.add("S0");
-        while (result.stream().anyMatch(this::isNonTerminal)) {
-            for (int i = 0; i < result.size(); i++) {
-                String element = result.get(i);
-                if (isNonTerminal(element)) {
-                    result.remove(i);
-                    List<String> productions = rules.get(element);
-                    if (productions != null) {
-                        String production = productions.get(random.nextInt(productions.size()));
-                        Collections.addAll(result, production.split(" "));
-                    }
-                    break; // Перезапуск цикла после замены
-                }
+    Generator() {
+        Dict dict = new Dict();
+
+        // Определение структуры утвердительного предложения
+        Vector<Vector<Node>> helpVec = new Vector<Vector<Node>>() {{
+            add(new Vector<Node>() {{
+                add(SubjectGroup);
+                add(vGroup);
+                add(AdjAction); //простое
+            }});
+            add(new Vector<Node>() {{
+                add(SubjectGroup);
+                add(vGroup);
+                add(AdjAction);
+
+                add(Link);
+                add(SubjectGroup);
+                add(vGroup);
+                add(AdjAction); //сложное
+            }});
+            add(new Vector<Node>() {{
+                add(SubjectGroup);
+                add(vGroup);
+                add(AdjAction);
+                add(Link);
+                add(SubjectGroup);
+                add(vGroup);
+                add(AdjAction);
+                add(Preposition); //сложное с местом
+                add(Place);
+            }});
+        }};
+        SentP.setMatrix_roles(new Vector<>(helpVec));
+        helpVec.clear();
+
+
+        // Определение структуры вопросительного предложения
+        helpVec.add(new Vector<Node>() {{
+            add(vGroup);
+            add(SubjectGroup);
+        }});
+        helpVec.add(new Vector<Node>() {{
+            add(vGroup);
+            add(SubjectGroup);                
+            add(Preposition); //с местом
+            add(Place);
+        }});
+        SentQ.setMatrix_roles(new Vector<>(helpVec));
+        helpVec.clear();
+
+
+        // Определение структуры отрицательного предложения
+        helpVec.add(new Vector<Node>() {{
+            add(SubjectGroup);
+            add(vGroup);
+            add(Not);
+        }});
+        helpVec.add(new Vector<Node>() {{
+            add(SubjectGroup);
+            add(vGroup);
+            add(Not);             
+            add(Preposition); //с местом
+            add(Place);
+        }});
+        SentN.setMatrix_roles(new Vector<>(helpVec));
+        helpVec.clear();
+
+
+        // Определение группы подлежащих
+        helpVec.add(new Vector<Node>() {{
+            add(Adjective);
+            add(NounObject);
+        }});
+        helpVec.add(new Vector<Node>() {{
+            add(Pronoun);
+        }});
+        SubjectGroup.setMatrix_roles(new Vector<>(helpVec));
+        helpVec.clear();
+
+
+        // Определение группы глаголов
+        helpVec.add(new Vector<Node>() {{
+            add(vActGroup);
+        }});
+        helpVec.add(new Vector<Node>() {{
+            add(vStateGroup);
+        }});
+        helpVec.add(new Vector<Node>() {{
+            add(vMoveGroup);
+        }});
+        vGroup.setMatrix_roles(new Vector<>(helpVec));
+        helpVec.clear();
+
+        // Определение других групп
+        vStateGroup.setTokens(dict.vStates);
+        vMoveGroup.setTokens(dict.vMoves);
+        vActGroup.setTokens(dict.vActions);
+        Adjective.setTokens(dict.adjectives);
+        NounObject.setTokens(dict.nounObjects);
+        Pronoun.setTokens(dict.pronouns);
+        AdjAction.setTokens(dict.adjAction);
+        Preposition.setTokens(dict.prepositions);
+        Place.setTokens(dict.places);
+        Link.setTokens(dict.links);
+        Not.setTokens(new ArrayList<>(Collections.singletonList("nicht")));
+    }
+
+    String GenerateQ() {
+        return GenerateGen(SentQ) + "?";
+    }
+
+    String GenerateP() {
+        return GenerateGen(SentP) + ".";
+    }
+
+    String GenerateN() {
+        return GenerateGen(SentN) + ".";
+    }
+
+    String GenerateGen(Node role) {
+        Vector<Node> vecNode = new Vector<>();
+        vecNode.add(role);
+        for (int i = 0; i < vecNode.size(); i++) {
+            if (!vecNode.get(i).matrix_roles.isEmpty()) {
+                Vector<Node> helpVec = vecNode.get(i).getRandomRules();
+                vecNode.remove(i);
+                vecNode.addAll(i, helpVec);
+                i--;
             }
         }
-        result.removeIf(s -> s.equals("e’"));
-        return String.join(" ", result);
-    }
+        Vector<String> tokens = new Vector<>();
+        for (int i = 0; i < vecNode.size(); i++) {
+            tokens.add(vecNode.get(i).getRandomToken());
+        }
+        String sentence = String.join(" ", tokens);
 
-    private boolean isNonTerminal(String symbol) {
-        return rules.containsKey(symbol);
+        if (!sentence.isEmpty()) {
+            sentence = Character.toUpperCase(sentence.charAt(0)) + sentence.substring(1);
+        }
+        return sentence;
     }
 }
